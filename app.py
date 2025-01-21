@@ -1,82 +1,175 @@
-from flask import Flask, render_template, request, redirect
-import yaml
+﻿from flask import Flask, request, session
 import mysql.connector
+from res.PythonScripts import authenticationAndProfile, productsHandling, utils, reports, managersFunctions
+
 
 app = Flask(__name__)
+app.secret_key = 'your secret key'
 
-# configuration of the DB
-db_details = yaml.full_load(open("res/db_details.yaml"))
-app.config['MYSQL_HOST'] = db_details['mysql_host']
-app.config['MYSQL_USER'] = db_details['mysql_user']
-app.config['MYSQL_PORT'] = db_details['mysql_port']
-app.config['MYSQL_PASSWORD'] = db_details['mysql_password']
-app.config['MYSQL_DB'] = db_details['mysql_db']
+# TODO : Get the db_details from the txt file
+db_details = {'user': 'root', 'password': '', 'host': 'localhost', 'database': 'test3'}
+# db_details = {'user': 'freedb_testuser2', 'password': '87fB*5ueP#E6yru', 'host': 'sql.freedb.tech', 'database': 'freedb_testdatabase2', 'port': 3306}
+database_instance = mysql.connector.connect(**db_details)
 
 
-# this is an endpoint (/)
-@app.route('/', methods=['GET', 'POST'])
-# Here we say that this can be a GET or a POST request. If this is a GET request, return the render_template()
-# To check whether this is get or post, we can use "request"
-def index():
-    myCursor = myDB.cursor()
-
-    if request.method == "POST":
-        userDetails = request.form
-        name = userDetails['name_input']
-        email = userDetails['email_input']
-
-        myCursor.execute("INSERT INTO users(name, email) VALUES(%s, %s)", (name, email))
-        myDB.commit()
-
-        # this can be used to redirect to another page
-        return redirect('/users')
-
-    # here we can simply return the HTML code to the web page as a string
-    # return "<font color=red>Hi, returning flask</font>"
-
-    # otherwise, we can render a HTML file to string like below
-    # the HTML file to be rendered. This should be located in a folder called "templates" from the root of the project
-    return render_template('index.html')
+@app.route('/')
+@app.route('/home', methods=['GET', 'POST'])
+def home():
+    return authenticationAndProfile.homepage(request, database_instance, session)
 
 
-# end point for showing user details. Here this can be done by GET
-@app.route('/users')
-def users():
-    myCursor = myDB.cursor()
-    myCursor.execute("SELECT * FROM users")
-    userDetails = myCursor.fetchall()
-    return render_template('users.html', userDetails=userDetails)
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    return authenticationAndProfile.registrationFunction(request, database_instance, False)
 
 
-def creatingTables(myDB):
-    with open("res/sqlFiles/creatingTablesSqlQueriesTXT.txt", 'r') as creatingTablesSqlQueriesTXTFile:
-        queryCreatingTables = creatingTablesSqlQueriesTXTFile.read()
-    myCursor = myDB.cursor()
-    print(queryCreatingTables)
-    try:
-        myCursor.execute(queryCreatingTables, multi=True)
-        print("Tables Successfully Created")
-    except Exception as e:
-        print("Exception Occurred")
-        print(e)
-    myCursor.close()
-
-    # myCursor2 = myDB.cursor()
-    # print("\n\nCreated Tables List\n")
-    # myCursor2.execute("SHOW TABLES;")
-    # createdTablesList = myCursor2.fetchall()
-    # for table in createdTablesList:
-    #     print(table)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    return authenticationAndProfile.loginFunction(request, session, database_instance)
 
 
+@app.route('/logout')
+def logout():
+    return authenticationAndProfile.logoutFunction(session)
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    return authenticationAndProfile.profileFunction(database_instance, session, request)
+
+
+@app.route('/product_list', methods=['GET', 'POST'])
+def productList():
+    return productsHandling.productListFunction(database_instance, session)
+
+
+@app.route('/addtocart', methods=['GET', 'POST'])
+def AddToCart():
+    return productsHandling.AddToCartFunction(request, database_instance, session)
+
+
+@app.route('/cart', methods=['GET', 'POST'])
+def Cart():
+    return productsHandling.CartFunction(request, db_details, database_instance, session)
+
+
+@app.route('/buyNow', methods=['GET', 'POST'])
+def BuyNow():
+    return productsHandling.BuyNowFunction(request, db_details, database_instance, session)
+
+
+@app.route('/mainmanager', methods=['GET', 'POST'])
+def mainmanager():
+    return managersFunctions.mainManagerFunction(database_instance, session, request)
+
+
+@app.route('/storemanager', methods=['GET', 'POST'])
+def storemanager():
+    return managersFunctions.storeManagerFunction(database_instance, session, request)
+
+
+@app.route('/mmdashboard')
+def MainManagerDashBoard():
+    return managersFunctions.MainManagerDashBoardFunction()
+
+
+@app.route('/smdashboard')
+def StoreManagerDashBoard():
+    return managersFunctions.StoreManagerDashBoardFunction()
+
+
+@app.route('/trainschedule', methods=['GET', 'POST'])
+def trainsched():
+    return managersFunctions.trainSchedFunction(database_instance, session, request)
+
+
+@app.route('/truckschedule')
+def trucksched():
+    return managersFunctions.truckSchedFunction()
+
+
+@app.route('/humanresources',methods = ['GET','POST'])
+def humanres():
+    return managersFunctions.humanResFunction(database_instance, session, request)
+
+
+@app.route('/logistics',methods = ['GET','POST'])
+def logistics():
+    return managersFunctions.logisticsFunction(database_instance, session, request)
+
+
+# @app.route('/pendingorders')
+# def pendingorders():
+#     return managersFunctions.pendingOrdersFunction()
+
+
+@app.route('/assets', methods = ['GET','POST'])
+def assets():
+    return managersFunctions.assetsFunction()
+
+
+@app.route('/addproducts',methods = ['GET','POST'])
+def addproducts():
+    return managersFunctions.addProductsFunction(database_instance, session, request)
+
+
+@app.route('/addtrucks', methods = ['GET', 'POST'])
+def addtrucks():
+    return managersFunctions.addTrucksFunction(database_instance, session, request)
+
+
+@app.route('/orders', methods=['GET', 'POST'])
+def orders():
+    return managersFunctions.ordersFunction(database_instance, session, request)
+
+
+@app.route('/pendingorders' ,methods = ['GET','POST'])
+def pendingorders():
+    return managersFunctions.pendingOrdersFunction(database_instance, session, request)
+
+
+# @app.route('/formstoremanagerfillstore', methods=['GET','POST'])
+# def formStoreManagerFillStore():
+#     return managersFunctions.FormStoreManagerFillStoreFuntion(database_instance, session, request)
+
+
+
+@app.route('/quarterlyreport', methods=['GET', 'POST'])
+def QuarterlyReport():
+    return reports.QuarterlyReportFunction(request, db_details, database_instance, session)
+
+
+@app.route('/itemswithmostorders', methods=['GET','POST'])
+def ItemsWithMostOrders():
+    return reports.ItemsWithMostOrdersFunction(request, database_instance, session)
+
+
+@app.route('/salesreportofstores')
+def SalesReportOfStores():
+    return reports.SalesReportOfStoresFunction(request, database_instance, session)
+
+
+@app.route('/workinghoursofdrivers')
+def WorkingHoursOfDrivers():
+    return reports.GetWorkingHoursOfDriversFunction(request, database_instance, session)
+
+
+@app.route('/workinghoursofdriverassistants')
+def WorkingHoursOfDriverAssistants():
+    return reports.GetWorkingHoursOfDriverAssistantsFunction(request, database_instance, session)
+
+
+@app.route('/customerreport', methods=['GET', 'POST'])
+def GenerateCustomerReport():
+    return reports.GenerateCustomerReportFunction(request, database_instance, session)
+
+
+@app.route('/trucksusedhours', methods=['GET', 'POST'])
+def UsedHoursOfTrucks():
+    return reports.UsedHoursOfTrucksFunction(request, database_instance, session)
+
+
+
+# main function
 if __name__ == '__main__':
-    myDB = mysql.connector.connect(host=db_details['mysql_host'], user=db_details['mysql_user'],
-                                   port=db_details['mysql_port'], database=db_details['mysql_db'],
-                                   password=db_details['mysql_password'])
-
-    # creating tables
-    creatingTables(myDB)
-
-
-    # when debug is true, as soon as the python file is saved while the server is running, the webpage changes.
-    # app.run(debug=False)
+    app.run(debug=True)
