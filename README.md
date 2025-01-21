@@ -18,27 +18,8 @@ A Supply Chain Management System developed to streamline and optimize supply cha
 - **Backend**: Python, Flask  
 - **Frontend**: HTML, CSS, Javascript  
 - **Database**: MySQL  
-- **Styling**: CSS  
-
----
-
-## Visual Overview
-
-Here are some images to showcase the Supply Chain Management System:
-
-### 1. Application Overview
-![Application Overview](image-path/2.jpeg)
-
----
-
-### 2. Database Admin
-![Database Admin](image-path/3.jpeg)
-
----
-
-### 3. Platform
-![Platform](image-path/4.jpeg)
-
+- **Styling**: CSS
+- 
 ---
 
 ## How to Use
