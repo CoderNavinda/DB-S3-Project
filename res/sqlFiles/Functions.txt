@@ -1,0 +1,38 @@
+---login
+DELIMITER $$   
+CREATE FUNCTION login_check(username VARCHAR(50),password1 VARCHAR(50)) RETURNS INT  
+BEGIN   
+DECLARE count1 INT DEFAULT 0;
+SELECT COUNT(*) INTO count1 FROM users WHERE users.username = username 
+AND users.password1 = password1;
+RETURN count1;
+END $$
+
+
+--register
+CREATE FUNCTION register(mode1 VARCHAR(50), username VARCHAR(50), 
+email VARCHAR(50), password1 VARCHAR(50)) 
+RETURNS INT
+BEGIN
+DECLARE count1 INT DEFAULT 0;
+DECLARE status INT DEFAULT 1;
+SELECT COUNT(*) INTO count1 FROM Users WHERE Username.username = username 
+AND Users.password1 = password1;
+IF count1 > 0 THEN
+      SET status = 0;
+ELSE
+      INSERT INTO Users VALUES (username,password1,email,mode1);
+END IF;
+RETURN status;
+END
+
+
+
+------add products
+delimiter //
+create procedure AddProduct(in item_id int,in item_name varchar(30),in capacity decimal(4,2), in price decimal(8,2), in description TEXT)
+begin
+    insert into items (item_id,item_name,capacity,price,description) values (item_id,item_name,capacity,price,description);
+end //
+delimiter ;
+
