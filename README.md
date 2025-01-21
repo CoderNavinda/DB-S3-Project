@@ -31,13 +31,13 @@ Here are some images to showcase the Supply Chain Management System:
 
 ---
 
-### 2. User Authentication Page
-![User Authentication Page](image-path/3.jpeg)
+### 2. Database Admin
+![Database Admin](image-path/3.jpeg)
 
 ---
 
-### 3. Database Efficiency Representation
-![Database Efficiency Representation](image-path/4.jpeg)
+### 3. Platform
+![Platform](image-path/4.jpeg)
 
 ---
 
